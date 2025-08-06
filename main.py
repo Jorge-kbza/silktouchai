@@ -55,7 +55,7 @@ def devolver_archivo():
     ruta_archivo = os.path.join("structures", filename)
 
     if not os.path.isfile(ruta_archivo):
-        return jsonify({"success": False, "error": "Archivo no encontrado"}), 404
+        return jsonify({"success": False, "error": "Archivo no encontrado"}), 403
 
     return send_file(
         ruta_archivo, as_attachment=True,
