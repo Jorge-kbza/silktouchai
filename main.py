@@ -47,25 +47,28 @@ def generar_archivo():
 @app.route('/download', methods=['GET', 'HEAD'])
 def devolver_archivo():
     nombre_random = request.args.get('file')
-
     if not nombre_random:
         return jsonify({"success": False, "error": "Falta el nombre del archivo"}), 400
 
     filename = secure_filename(nombre_random)
     ruta_archivo = os.path.join("structures", filename)
 
-    if not os.path.isfile(ruta_archivo):
-        return jsonify({"success": False, "error": "Archivo no encontrado"}), 403
-
     if request.method == "HEAD":
-        # Simplemente confirmar existencia
-        return '', 200
+        if os.path.isfile(ruta_archivo):
+            return '', 200
+        else:
+            return '', 404  # <- CAMBIA ESTO DE 403 A 404
+
+    if not os.path.isfile(ruta_archivo):
+        return jsonify({"success": False, "error": "Archivo no encontrado"}), 404
 
     return send_file(
-        ruta_archivo, as_attachment=True,
+        ruta_archivo,
+        as_attachment=True,
         download_name='estructura_generada.schem',
         mimetype="application/octet-stream"
     )
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=10000)
