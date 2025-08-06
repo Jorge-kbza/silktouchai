@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from Ai_controller import main, gestion_archivos
 
 app = Flask(__name__)
-CORS(app, origins=["https://silktouchai.com"])
+CORS(app)
 
 @app.route('/prompt', methods=['POST'])
 def generar_archivo():
