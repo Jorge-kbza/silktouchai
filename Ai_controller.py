@@ -27,7 +27,7 @@ def gestion_archivos():
     # Devolvemos la ruta al mundo de MC y el nombre de la carpeta
     return ruta_carpeta_copia, nombre_random
 
-def main(ruta, nombre_random, peticion):
+def main(ruta, nombre_random, peticion, nombre_archivo_web):
     full_text = ask_claude(peticion, ruta, nombre_random)
 
     # Ahora extraemos el bloque de código
@@ -45,7 +45,7 @@ def main(ruta, nombre_random, peticion):
 
             # Exportamos a .schem y devolvemos la ruta donde se encuentra el archivo
             output_path = schem_export(int(datos['x1']), int(datos['y1']), int(datos['z1']), int(datos['x2']), int(datos['y2']), int(datos['z2']),
-                         ruta, "structures", nombre_random)
+                         ruta, "structures", nombre_archivo_web)
             return output_path
 
         except Exception as e:

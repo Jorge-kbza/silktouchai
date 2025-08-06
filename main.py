@@ -16,6 +16,7 @@ CORS(app)
 def generar_archivo():
     datos = request.json
     prompt = datos.get('prompt')
+    nombre_archivo_web = datos.get('nombre')
     print(prompt)
 
     if not prompt:
@@ -25,7 +26,7 @@ def generar_archivo():
     ruta, nombre_random = gestion_archivos()
 
     # Claude genera y ejecuta el codigo generado mediante el prompt y crea el archivo .schem
-    ruta_archivo = main(ruta, nombre_random, prompt)
+    ruta_archivo = main(ruta, nombre_random, prompt, nombre_archivo_web)
 
     def borrar_carpeta_con_retraso(carpeta):
         time.sleep(30)
