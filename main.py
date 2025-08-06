@@ -68,3 +68,6 @@ def devolver_archivo():
         download_name='estructura_generada.schem',
         mimetype="application/octet-stream"
     )
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0', port=10000)
