@@ -44,7 +44,7 @@ def generar_archivo():
     print(f"{nombre_random}.schem")
     return jsonify({"success": True, "nombre_archivo": f"{nombre_random}.schem"})
 
-@app.route('/download')
+@app.route('/download', methods=['GET', 'HEAD'])
 def devolver_archivo():
     nombre_random = request.args.get('file')
 
@@ -56,6 +56,10 @@ def devolver_archivo():
 
     if not os.path.isfile(ruta_archivo):
         return jsonify({"success": False, "error": "Archivo no encontrado"}), 403
+
+    if request.method == "HEAD":
+        # Simplemente confirmar existencia
+        return '', 200
 
     return send_file(
         ruta_archivo, as_attachment=True,
