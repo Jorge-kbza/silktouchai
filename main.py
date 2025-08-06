@@ -17,7 +17,7 @@ def generar_archivo():
     datos = request.json
     prompt = datos.get('prompt')
     nombre_archivo_web = datos.get('nombre')
-    print(prompt)
+    print('Prompt-> ', prompt)
 
     if not prompt:
         return jsonify({'success': False, 'error': 'No se envió texto'}), 400
