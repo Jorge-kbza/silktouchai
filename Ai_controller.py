@@ -54,12 +54,3 @@ def main(ruta, nombre_random, peticion, nombre_archivo_web):
         print("\n⚠️ No se encontró un bloque de código en la respuesta.")
         print(full_text)
         return None
-
-if __name__ == '__main__':
-    print("Hola Mundo")
-    """
-    # Creamos la nueva carpeta que contendra la copia del mundo, JSON y .schem
-    ruta, nombre_random = gestion_archivos()
-    # Claude genera y ejecuta el codigo generado mediante el prompt y crea el archivo .schem
-    output_path = main(ruta,  nombre_random)
-    # Enviamos el archivo a la web para descargar"""
