@@ -14,35 +14,37 @@ CORS(app)
 
 @app.route('/prompt', methods=['POST'])
 def generar_archivo():
-    datos = request.json
-    prompt = datos.get('prompt')
-    nombre_archivo_web = datos.get('nombre')
-    print('Prompt-> ', prompt)
+    print("📥 POST recibido en /prompt")
 
-    if not prompt:
-        return jsonify({'success': False, 'error': 'No se envió texto'}), 400
+    try:
+        print("🧾 Headers:", dict(request.headers))
+        print("🧾 Content-Type:", request.content_type)
+        print("🧾 Raw data:", request.data)
 
-    # Creamos la nueva carpeta que contendra la copia del mundo, JSON y .schem
-    ruta, nombre_random = gestion_archivos()
+        datos = request.get_json(force=True)  # <--- Usa `force=True` para ver si fuerza bien la carga
+        print("📦 JSON recibido:", datos)
 
-    # Claude genera y ejecuta el codigo generado mediante el prompt y crea el archivo .schem
-    ruta_archivo = main(ruta, nombre_random, prompt, nombre_archivo_web)
+        prompt = datos.get('prompt')
+        nombre_archivo_web = datos.get('nombre')
 
-    def borrar_carpeta_con_retraso(carpeta):
-        time.sleep(30)
-        try:
-            shutil.rmtree(carpeta)
-            print(f"✅ Carpeta {carpeta} eliminada")
-        except Exception as e:
-            print(f"⚠️ Error al borrar carpeta: {e}")
+        print("📝 Prompt recibido:", prompt)
+        print("📁 Nombre de archivo recibido:", nombre_archivo_web)
 
-    @after_this_request
-    def cleanup(response):
-        threading.Thread(target=borrar_carpeta_con_retraso, args=(nombre_random,), daemon=True).start()
-        return response
+        if not prompt:
+            print("❌ Prompt vacío")
+            return jsonify({'success': False, 'error': 'No se envió texto'}), 400
 
-    print(f"{nombre_random}.schem")
-    return jsonify({"success": True, "nombre_archivo": f"{nombre_random}.schem"})
+        ruta, nombre_random = gestion_archivos()
+        ruta_archivo = main(ruta, nombre_random, prompt, nombre_archivo_web)
+
+        print("✅ Archivo generado:", ruta_archivo)
+
+        return jsonify({"success": True, "nombre_archivo": f"{nombre_random}.schem"})
+
+    except Exception as e:
+        print("💥 Error en /prompt:", str(e))
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @app.route('/download', methods=['GET', 'HEAD'])
 def devolver_archivo():
