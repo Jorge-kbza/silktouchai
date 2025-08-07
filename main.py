@@ -2,6 +2,7 @@ import os
 import shutil
 import threading
 import time
+import traceback
 
 from flask import Flask, request, send_file, after_this_request, jsonify
 from flask_cors import CORS
@@ -46,8 +47,10 @@ def generar_archivo():
 
         return jsonify({"success": True, "nombre_archivo": f"{nombre_random}.schem"})
 
+
     except Exception as e:
         print(f"❌ ERROR EN /prompt: {e}")
+        traceback.print_exc()  # <--- Añade esto
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
