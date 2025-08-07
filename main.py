@@ -151,30 +151,35 @@ def generar_archivo():
 @app.route('/download', methods=['GET', 'HEAD'])
 def devolver_archivo():
     try:
-        nombre_random = request.args.get('file')
-        if not nombre_random:
+        # 🔧 Corregir el parámetro y mensaje
+        ruta_archivo = request.args.get('ruta')
+        if not ruta_archivo:
             return jsonify({
                 "success": False,
-                "error": "Parámetro 'file' requerido"
+                "error": "Parámetro 'ruta' requerido"  # ✅ CORREGIDO
             }), 400
-
-        filename = secure_filename(nombre_random)
-        ruta_archivo = os.path.join("structures", filename)
 
         logging.info(f"📥 Solicitud de descarga: {ruta_archivo}")
 
+        # 🔍 HEAD request - solo verificar si existe
         if request.method == "HEAD":
             if os.path.isfile(ruta_archivo):
+                logging.info(f"✅ HEAD - Archivo existe: {ruta_archivo}")
                 return '', 200
             else:
+                logging.info(f"❌ HEAD - Archivo no encontrado: {ruta_archivo}")
                 return '', 404
 
+        # 📥 GET request - descargar archivo
         if not os.path.isfile(ruta_archivo):
+            logging.error(f"❌ GET - Archivo no encontrado: {ruta_archivo}")
             return jsonify({
                 "success": False,
-                "error": "Archivo no encontrado"
+                "error": f"Archivo no encontrado: {os.path.basename(ruta_archivo)}"
             }), 404
 
+        # 📤 Enviar archivo para descarga
+        logging.info(f"📤 Enviando archivo para descarga: {ruta_archivo}")
         return send_file(
             ruta_archivo,
             as_attachment=True,
@@ -184,9 +189,10 @@ def devolver_archivo():
 
     except Exception as e:
         logging.error(f"❌ ERROR EN /download: {str(e)}")
+        logging.error(f"📊 Traceback: {traceback.format_exc()}")
         return jsonify({
             "success": False,
-            "error": "Error al descargar archivo"
+            "error": "Error interno al procesar descarga"
         }), 500
 
 # 🔧 ENDPOINT DE HEALTH CHECK
