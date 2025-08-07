@@ -16,7 +16,7 @@ CORS(app, origins="*")
 
 @app.route('/')
 def pong():
-    print('PONG')
+    logging.info('PONG')
     return jsonify({'message': 'pong'}), 200
 
 @app.route('/prompt', methods=['POST'])
@@ -25,7 +25,7 @@ def generar_archivo():
         datos = request.json
         prompt = datos.get('prompt')
         nombre_archivo_web = datos.get('nombre')
-        logging.info('🟢 Prompt recibido:', prompt)
+        logging.info(f'🟢 Prompt recibido: {prompt}')
 
         if not prompt:
             return jsonify({'success': False, 'error': 'No se envió texto'}), 400
