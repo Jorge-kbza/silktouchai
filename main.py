@@ -14,6 +14,7 @@ CORS(app, origins="*")
 
 @app.route('/')
 def pong():
+    print('PONG')
     return jsonify({'message': 'pong'}), 200
 
 @app.route('/prompt', methods=['POST'])
