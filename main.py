@@ -189,7 +189,6 @@ def devolver_archivo():
             "error": "Error al descargar archivo"
         }), 500
 
-
 # 🔧 ENDPOINT DE HEALTH CHECK
 @app.route('/health')
 def health_check():
@@ -197,7 +196,6 @@ def health_check():
         'status': 'healthy',
         'timestamp': time.time()
     }), 200
-
 
 if __name__ == "__main__":
     logging.info("🚀 SILKTOUCH AI INICIANDO...")
