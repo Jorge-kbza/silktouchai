@@ -9,7 +9,7 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
 from Ai_controller import main, gestion_archivos
-
+print("🚨 main.py correcto: esto es el backend REAL que se está ejecutando")
 app = Flask(__name__)
 CORS(app, origins="*")
 
@@ -80,4 +80,5 @@ def devolver_archivo():
     )
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=10000)
+    print("HOLA MUNDO SILKTOUCH AI OPERATIVO")
+    app.run(debug=True, host='0.0.0.0', port=5000)
