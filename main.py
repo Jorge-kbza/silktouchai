@@ -49,7 +49,12 @@ def generar_archivo():
             threading.Thread(target=borrar_carpeta_con_retraso, args=(nombre_random,), daemon=True).start()
             return response
 
-        return jsonify({"success": True, "nombre_archivo": f"{nombre_random}.schem"})
+        return send_file(
+            f'{nombre_archivo_web}.schem',
+            as_attachment=True,  # Fuerza descarga
+            download_name="estructura_generada.schem",  # Nombre que verá el usuario
+            mimetype="application/octet-stream"  # Tipo de archivo binario
+        )
 
 
     except Exception as e:
