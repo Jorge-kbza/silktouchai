@@ -1,7 +1,11 @@
+import os
+
 from anthropic import Anthropic
 
 def ask_claude(peticion, ruta_del_mundo, nombre_random):
-    client = Anthropic(api_key='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')
+
+    api_key = os.environ.get("API_KEY")  # <- accede a la variable
+    client = Anthropic(api_key=api_key)
 
     reglas = f"""
         Quiero que crees esta estructura usando Python y Amulet-Core, para minecraft. No olvides:

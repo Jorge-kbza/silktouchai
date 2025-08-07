@@ -12,6 +12,10 @@ from Ai_controller import main, gestion_archivos
 app = Flask(__name__)
 CORS(app, origins="*")
 
+@app.route('/ping')
+def pong():
+    return jsonify({'message': 'pong'}), 200
+
 @app.route('/prompt', methods=['POST'])
 def generar_archivo():
     try:
