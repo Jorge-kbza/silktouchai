@@ -7,7 +7,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-from flask import Flask, request, send_file, after_this_request, jsonify, make_response
+from flask import Flask, request, send_file, after_this_request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
@@ -15,11 +15,11 @@ from Ai_controller import main, gestion_archivos
 
 app = Flask(__name__)
 
-# 🔧 CORS MEJORADO - ESTO ES CLAVE
+# 🔧 CORS SIMPLE - SIN DUPLICADOS
 CORS(app,
-     origins=["*"],
+     origins="*",
      methods=["GET", "POST", "HEAD", "OPTIONS"],
-     allow_headers=["Content-Type", "Authorization", "Accept"],
+     allow_headers=["Content-Type", "Accept"],
      supports_credentials=False
 )
 
@@ -28,70 +28,42 @@ CORS(app,
 def handle_internal_error(e):
     """Asegura que todos los errores 500 devuelvan JSON"""
     logging.error(f"❌ Error 500: {str(e)}")
-    response = jsonify({
+    return jsonify({
         'success': False,
         'error': 'Error interno del servidor'
-    })
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response, 500
+    }), 500
 
 @app.errorhandler(404)
 def handle_not_found(e):
     """Maneja errores 404 como JSON"""
-    response = jsonify({
+    return jsonify({
         'success': False,
         'error': 'Endpoint no encontrado'
-    })
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response, 404
-
-# 🔧 MANEJAR PREFLIGHT REQUESTS
-@app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        response = make_response()
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,Accept")
-        response.headers.add('Access-Control-Allow-Methods', "GET,POST,HEAD,OPTIONS")
-        return response
+    }), 404
 
 @app.route('/')
 def pong():
     logging.info('🟢 PONG')
-    response = jsonify({'message': 'pong'})
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response, 200
+    return jsonify({'message': 'pong'}), 200
 
-@app.route('/prompt', methods=['POST', 'OPTIONS'])
+@app.route('/prompt', methods=['POST'])
 def generar_archivo():
-    # Manejar preflight
-    if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,Accept")
-        response.headers.add('Access-Control-Allow-Methods', "POST,OPTIONS")
-        return response
-
     try:
         # 🔍 VALIDACIÓN MEJORADA DE ENTRADA
         if not request.is_json:
             logging.error("❌ Request no es JSON")
-            response = jsonify({
+            return jsonify({
                 'success': False,
                 'error': 'Content-Type debe ser application/json'
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 400
+            }), 400
 
         datos = request.get_json()
         if not datos:
             logging.error("❌ Body JSON vacío")
-            response = jsonify({
+            return jsonify({
                 'success': False,
                 'error': 'Body JSON requerido'
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 400
+            }), 400
 
         prompt = datos.get('prompt', '').strip()
         nombre_archivo_web = datos.get('nombre', '').strip()
@@ -101,28 +73,22 @@ def generar_archivo():
 
         # 🚨 VALIDACIONES
         if not prompt:
-            response = jsonify({
+            return jsonify({
                 'success': False,
                 'error': 'El campo "prompt" es requerido y no puede estar vacío'
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 400
+            }), 400
 
         if not nombre_archivo_web:
-            response = jsonify({
+            return jsonify({
                 'success': False,
                 'error': 'El campo "nombre" es requerido y no puede estar vacío'
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 400
+            }), 400
 
         if len(prompt) > 1000:  # Límite de caracteres
-            response = jsonify({
+            return jsonify({
                 'success': False,
                 'error': 'El prompt no puede exceder 1000 caracteres'
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 400
+            }), 400
 
         # 🔧 PROCESAMIENTO
         logging.info("📁 Creando carpeta...")
@@ -152,12 +118,10 @@ def generar_archivo():
         # Verificar que el archivo realmente se creó
         if not os.path.exists(ruta_descarga):
             logging.error(f"❌ Archivo no fue creado: {ruta_descarga}")
-            response = jsonify({
+            return jsonify({
                 'success': False,
                 'error': 'Error al generar el archivo'
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 500
+            }), 500
 
         # Programar limpieza
         threading.Thread(
@@ -167,13 +131,11 @@ def generar_archivo():
         ).start()
 
         logging.info(f"✅ Respuesta exitosa - ruta: {ruta_descarga}")
-        response = jsonify({
+        return jsonify({
             'success': True,
             'ruta': ruta_descarga,
             'mensaje': 'Archivo generado correctamente'
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 200
+        }), 200
 
     except Exception as e:
         # 🚨 MANEJO ROBUSTO DE ERRORES
@@ -181,35 +143,21 @@ def generar_archivo():
         logging.error(f"❌ ERROR EN /prompt: {error_msg}")
         logging.error(f"📊 Traceback: {traceback.format_exc()}")
 
-        # NUNCA devolver el error real en producción por seguridad
-        response = jsonify({
+        return jsonify({
             'success': False,
             'error': 'Error interno al procesar la solicitud',
-            'debug': error_msg if app.debug else None  # Solo en modo debug
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
+            'debug': error_msg if app.debug else None
+        }), 500
 
-@app.route('/download', methods=['GET', 'HEAD', 'OPTIONS'])
+@app.route('/download', methods=['GET', 'HEAD'])
 def devolver_archivo():
-    # Manejar preflight
-    if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,Accept")
-        response.headers.add('Access-Control-Allow-Methods', "GET,HEAD,OPTIONS")
-        return response
-
     try:
-        # 🔧 Corregir el parámetro y mensaje
         ruta_archivo = request.args.get('ruta')
         if not ruta_archivo:
-            response = jsonify({
+            return jsonify({
                 "success": False,
                 "error": "Parámetro 'ruta' requerido"
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 400
+            }), 400
 
         logging.info(f"📥 Solicitud de descarga: {ruta_archivo}")
 
@@ -217,24 +165,18 @@ def devolver_archivo():
         if request.method == "HEAD":
             if os.path.isfile(ruta_archivo):
                 logging.info(f"✅ HEAD - Archivo existe: {ruta_archivo}")
-                response = make_response('', 200)
-                response.headers.add('Access-Control-Allow-Origin', '*')
-                return response
+                return '', 200
             else:
                 logging.info(f"❌ HEAD - Archivo no encontrado: {ruta_archivo}")
-                response = make_response('', 404)
-                response.headers.add('Access-Control-Allow-Origin', '*')
-                return response
+                return '', 404
 
         # 📥 GET request - descargar archivo
         if not os.path.isfile(ruta_archivo):
             logging.error(f"❌ GET - Archivo no encontrado: {ruta_archivo}")
-            response = jsonify({
+            return jsonify({
                 "success": False,
                 "error": f"Archivo no encontrado: {os.path.basename(ruta_archivo)}"
-            })
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response, 404
+            }), 404
 
         # 📤 Enviar archivo para descarga
         logging.info(f"📤 Enviando archivo para descarga: {ruta_archivo}")
@@ -248,30 +190,18 @@ def devolver_archivo():
     except Exception as e:
         logging.error(f"❌ ERROR EN /download: {str(e)}")
         logging.error(f"📊 Traceback: {traceback.format_exc()}")
-        response = jsonify({
+        return jsonify({
             "success": False,
             "error": "Error interno al procesar descarga"
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
+        }), 500
 
 # 🔧 ENDPOINT DE HEALTH CHECK
 @app.route('/health')
 def health_check():
-    response = jsonify({
+    return jsonify({
         'status': 'healthy',
         'timestamp': time.time()
-    })
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response, 200
-
-# 🔧 AGREGAR HEADERS CORS A TODAS LAS RESPUESTAS
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,HEAD')
-    return response
+    }), 200
 
 if __name__ == "__main__":
     logging.info("🚀 SILKTOUCH AI INICIANDO...")
