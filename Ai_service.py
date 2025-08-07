@@ -581,5 +581,6 @@ def ask_claude(peticion, ruta_del_mundo, nombre_random):
     for chunk in response:
         if hasattr(chunk, 'delta') and hasattr(chunk.delta, 'text') and chunk.delta.text:
             full_text += chunk.delta.text
+            print(chunk.delta.text)
 
     return full_text
