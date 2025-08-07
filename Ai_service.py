@@ -3,7 +3,7 @@ import os
 from anthropic import Anthropic
 
 def ask_claude(peticion, ruta_del_mundo, nombre_random):
-    api_key = os.environ.get("API_KEY", ""  )
+    api_key = os.environ.get("API_KEY", "")
     client = Anthropic(api_key=api_key)
 
     reglas = f"""

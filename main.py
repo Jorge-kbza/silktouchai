@@ -14,35 +14,42 @@ CORS(app)
 
 @app.route('/prompt', methods=['POST'])
 def generar_archivo():
-    datos = request.json
-    prompt = datos.get('prompt')
-    nombre_archivo_web = datos.get('nombre')
-    print('Prompt-> ', prompt)
+    try:
+        datos = request.json
+        prompt = datos.get('prompt')
+        nombre_archivo_web = datos.get('nombre')
+        print('🟢 Prompt recibido:', prompt)
 
-    if not prompt:
-        return jsonify({'success': False, 'error': 'No se envió texto'}), 400
+        if not prompt:
+            return jsonify({'success': False, 'error': 'No se envió texto'}), 400
 
-    # Creamos la nueva carpeta que contendra la copia del mundo, JSON y .schem
-    ruta, nombre_random = gestion_archivos()
+        # Creamos carpeta
+        ruta, nombre_random = gestion_archivos()
+        print(f"📁 Carpeta creada: {ruta}")
 
-    # Claude genera y ejecuta el codigo generado mediante el prompt y crea el archivo .schem
-    ruta_archivo = main(ruta, nombre_random, prompt, nombre_archivo_web)
+        # Ejecutamos IA y generamos archivo
+        ruta_archivo = main(ruta, nombre_random, prompt, nombre_archivo_web)
+        print(f"📦 Archivo generado: {ruta_archivo}")
 
-    def borrar_carpeta_con_retraso(carpeta):
-        time.sleep(30)
-        try:
-            shutil.rmtree(carpeta)
-            print(f"✅ Carpeta {carpeta} eliminada")
-        except Exception as e:
-            print(f"⚠️ Error al borrar carpeta: {e}")
+        def borrar_carpeta_con_retraso(carpeta):
+            time.sleep(30)
+            try:
+                shutil.rmtree(carpeta)
+                print(f"✅ Carpeta {carpeta} eliminada")
+            except Exception as e:
+                print(f"⚠️ Error al borrar carpeta: {e}")
 
-    @after_this_request
-    def cleanup(response):
-        threading.Thread(target=borrar_carpeta_con_retraso, args=(nombre_random,), daemon=True).start()
-        return response
+        @after_this_request
+        def cleanup(response):
+            threading.Thread(target=borrar_carpeta_con_retraso, args=(nombre_random,), daemon=True).start()
+            return response
 
-    print(f"{nombre_random}.schem")
-    return jsonify({"success": True, "nombre_archivo": f"{nombre_random}.schem"})
+        return jsonify({"success": True, "nombre_archivo": f"{nombre_random}.schem"})
+
+    except Exception as e:
+        print(f"❌ ERROR EN /prompt: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @app.route('/download', methods=['GET', 'HEAD'])
 def devolver_archivo():
