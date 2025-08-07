@@ -3,6 +3,8 @@ import shutil
 import threading
 import time
 import traceback
+import logging
+logging.basicConfig(level=logging.INFO)
 
 from flask import Flask, request, send_file, after_this_request, jsonify
 from flask_cors import CORS
@@ -23,18 +25,18 @@ def generar_archivo():
         datos = request.json
         prompt = datos.get('prompt')
         nombre_archivo_web = datos.get('nombre')
-        print('🟢 Prompt recibido:', prompt)
+        logging.info('🟢 Prompt recibido:', prompt)
 
         if not prompt:
             return jsonify({'success': False, 'error': 'No se envió texto'}), 400
 
         # Creamos carpeta
         ruta, nombre_random = gestion_archivos()
-        print(f"📁 Carpeta creada: {ruta}")
+        logging.info(f"📁 Carpeta creada: {ruta}")
 
         # Ejecutamos IA y generamos archivo
         ruta_archivo = main(ruta, nombre_random, prompt, nombre_archivo_web)
-        print(f"📦 Archivo generado: {ruta_archivo}")
+        logging.info(f"📦 Archivo generado: {ruta_archivo}")
 
         def borrar_carpeta_con_retraso(carpeta):
             time.sleep(30)
@@ -42,7 +44,7 @@ def generar_archivo():
                 shutil.rmtree(carpeta)
                 print(f"✅ Carpeta {carpeta} eliminada")
             except Exception as e:
-                print(f"⚠️ Error al borrar carpeta: {e}")
+                logging.info(f"⚠️ Error al borrar carpeta: {e}")
 
         @after_this_request
         def cleanup(response):
@@ -89,7 +91,7 @@ def devolver_archivo():
     )
 
 if __name__ == "__main__":
-    print("HOLA MUNDO SILKTOUCH AI OPERATIVO AAAAAAAAAAAAAAAa")
+    logging.info("HOLA MUNDO SILKTOUCH AI OPERATIVO AAAAAAAAAAAAAAAa")
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
