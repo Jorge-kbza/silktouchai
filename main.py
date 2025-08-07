@@ -12,7 +12,7 @@ from Ai_controller import main, gestion_archivos
 app = Flask(__name__)
 CORS(app, origins="*")
 
-@app.route('/ping')
+@app.route('/')
 def pong():
     return jsonify({'message': 'pong'}), 200
 
