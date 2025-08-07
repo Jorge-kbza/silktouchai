@@ -52,7 +52,7 @@ def generar_archivo():
             return response
 
         return send_file(
-            f'{nombre_archivo_web}.schem',
+            f'structures/{nombre_archivo_web}.schem',
             as_attachment=True,  # Fuerza descarga
             download_name="estructura_generada.schem",  # Nombre que verá el usuario
             mimetype="application/octet-stream"  # Tipo de archivo binario
