@@ -351,14 +351,14 @@ def ask_claude(peticion, ruta_del_mundo, nombre_random):
     max_y = ground_y + central_tower_height + central_tower_radius + 10
 
     # Datos de coordenadas
-    datos = {
+    datos = {{
         "x1": min_x,
         "y1": min_y,
         "z1": min_z,
         "x2": max_x,
         "y2": max_y,
         "z2": max_z
-    }
+    }}
 
     # Ruta al archivo JSON en la misma carpeta del script
     ruta = os.path.join("{nombre_random}", "datos.json")
