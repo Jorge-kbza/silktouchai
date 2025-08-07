@@ -8,563 +8,370 @@ def ask_claude(peticion, ruta_del_mundo, nombre_random):
     client = Anthropic(api_key=api_key)
 
     reglas = f"""
-        Quiero que crees esta estructura usando Python y Amulet-Core, para minecraft. No olvides:
-        - No es necesario que uses prints ni expliques el codigo
-        - Haz la construccion completa, e competente, escatima en gastos
-        - Los interiores no son tan importantes, importa mas la fachada, el exterior
-        - Siempre definir todos los bloques usados explícitamente, ya que a veces olvidas definir bloques y da errores, en caso de error usa un bloque de tierra
-        - No tener errores de sintaxis ni ejecución.
-        - El código debe ejecutarse directamente sin fallos.
-        - No te olvides del world.save() y world.close()
-        - No uses las propiedades de los bloques, es decir, no pongas esto: "facing": "north", sin orientaciones ni nada
-        - El mundo de minecraft será un mundo plano
-        - No es necesario que limpies la zona, construye directamente
+            Quiero que crees esta estructura usando Python y Amulet-Core, para minecraft. No olvides:
+            - No es necesario que uses prints ni expliques el codigo
+            - Haz la construccion completa, e competente, escatima en gastos
+            - Los interiores no son tan importantes, importa mas la fachada, el exterior
+            - Siempre definir todos los bloques usados explícitamente, ya que a veces olvidas definir bloques y da errores, en caso de error usa un bloque de tierra
+            - No tener errores de sintaxis ni ejecución.
+            - El código debe ejecutarse directamente sin fallos.
+            - No te olvides del world.save() y world.close()
+            - No uses las propiedades de los bloques, es decir, no pongas esto: "facing": "north", sin orientaciones ni nada
+            - El mundo de minecraft será un mundo plano
+            - No es necesario que limpies la zona, construye directamente
 
-        - Lo mas importante, debes guardar las coordenadas en donde se encuentra la estructura creada en json, siguiendo exactamente este modelo:
-        import os
-        import json
+            - Lo mas importante, debes guardar las coordenadas en donde se encuentra la estructura creada en json, siguiendo exactamente este modelo:
 
-        # Datos que quieres guardar
-        datos = {{
-          "x1": 98,
-          "y1": 170,
-          "z1": 20090,
-          "x2": 78,
-          "y2": 210,
-          "z2": 20076
-        }}
+    	import amulet
+    from amulet.api.block import Block
+    import math
+    import random
+    import os
+    import json
 
-        # Ruta al archivo JSON en la misma carpeta del script
-        ruta = os.path.join("{nombre_random}", "datos.json")
+    # Cargar el mundo de Minecraft
+    world_path = "{ruta_del_mundo}"
+    world = amulet.load_level(world_path)
+    dimension = "minecraft:overworld"
 
-        # Guardar los datos en el JSON
-        with open(ruta, "w", encoding="utf-8") as json_file:
-            json.dump(datos, json_file, indent=4, ensure_ascii=False)
+    # Coordenadas base del castillo
+    base_x, base_z = 0, 0
+    ground_y = 65
+
+    # Definir todos los bloques explícitamente
+    stone_bricks = Block("minecraft", "stone_bricks")
+    chiseled_stone_bricks = Block("minecraft", "chiseled_stone_bricks")
+    cracked_stone_bricks = Block("minecraft", "cracked_stone_bricks")
+    mossy_stone_bricks = Block("minecraft", "mossy_stone_bricks")
+    cobblestone = Block("minecraft", "cobblestone")
+    mossy_cobblestone = Block("minecraft", "mossy_cobblestone")
+    oak_planks = Block("minecraft", "oak_planks")
+    dark_oak_planks = Block("minecraft", "dark_oak_planks")
+    oak_log = Block("minecraft", "oak_log")
+    dark_oak_log = Block("minecraft", "dark_oak_log")
+    iron_bars = Block("minecraft", "iron_bars")
+    glass = Block("minecraft", "glass")
+    glowstone = Block("minecraft", "glowstone")
+    torch = Block("minecraft", "torch")
+    lantern = Block("minecraft", "lantern")
+    air = Block("minecraft", "air")
+    grass_block = Block("minecraft", "grass_block")
+    dirt = Block("minecraft", "dirt")
+    stone = Block("minecraft", "stone")
+    andesite = Block("minecraft", "andesite")
+    polished_andesite = Block("minecraft", "polished_andesite")
+    quartz_block = Block("minecraft", "quartz_block")
+    chiseled_quartz_block = Block("minecraft", "chiseled_quartz_block")
+    white_concrete = Block("minecraft", "white_concrete")
+    light_gray_concrete = Block("minecraft", "light_gray_concrete")
+    gray_concrete = Block("minecraft", "gray_concrete")
+    red_concrete = Block("minecraft", "red_concrete")
+    oak_stairs = Block("minecraft", "oak_stairs")
+    stone_brick_stairs = Block("minecraft", "stone_brick_stairs")
+    cobblestone_stairs = Block("minecraft", "cobblestone_stairs")
+    oak_slab = Block("minecraft", "oak_slab")
+    stone_brick_slab = Block("minecraft", "stone_brick_slab")
+    oak_door = Block("minecraft", "oak_door")
+    iron_door = Block("minecraft", "iron_door")
+    water = Block("minecraft", "water")
+    blue_concrete = Block("minecraft", "blue_concrete")
+    cyan_concrete = Block("minecraft", "cyan_concrete")
 
 
-        Aquí te dejo un ejemplo para guiarte de como se programa en python con amulet-core:
-        import amulet
-        from amulet.api.block import Block
-        # Ruta del mundo
-        import amulet
-        from amulet.api.block import Block
-        import math
-        import random
+    def place_block(x, y, z, block):
+        cx, cz = x >> 4, z >> 4
+        try:
+            chunk = world.get_chunk(cx, cz, dimension)
+        except:
+            chunk = world.create_chunk(cx, cz, dimension)
+        lx, lz = x % 16, z % 16
+        chunk.blocks[lx, y, lz] = chunk.block_palette.get_add_block(block)
+        world.put_chunk(chunk, dimension)
 
-        # Load the Minecraft world
-        world_path = "{ruta_del_mundo}"
-        world = amulet.load_level(world_path)
-        dimension = "minecraft:overworld"
-    
-        # Base coordinates
-        base_x, base_z = 0, 0
-        ground_y = 100  # Higher for floating effect
-    
-        # MAGICAL FANTASY BLOCKS - Premium materials
-        # Stone varieties
-        quartz_block = Block("minecraft", "quartz_block")
-        chiseled_quartz = Block("minecraft", "chiseled_quartz_block")
-        quartz_pillar = Block("minecraft", "quartz_pillar")
-        white_concrete = Block("minecraft", "white_concrete")
-        light_gray_concrete = Block("minecraft", "light_gray_concrete")
-        pink_concrete = Block("minecraft", "pink_concrete")
-        purple_concrete = Block("minecraft", "purple_concrete")
-        magenta_concrete = Block("minecraft", "magenta_concrete")
-    
-        # Mystical materials
-        prismarine = Block("minecraft", "prismarine")
-        dark_prismarine = Block("minecraft", "dark_prismarine")
-        prismarine_bricks = Block("minecraft", "prismarine_bricks")
-        sea_lantern = Block("minecraft", "sea_lantern")
-        glowstone = Block("minecraft", "glowstone")
-        amethyst_block = Block("minecraft", "amethyst_block")
-    
-        # Glass varieties
-        glass = Block("minecraft", "glass")
-        white_stained_glass = Block("minecraft", "white_stained_glass")
-        light_blue_stained_glass = Block("minecraft", "light_blue_stained_glass")
-        cyan_stained_glass = Block("minecraft", "cyan_stained_glass")
-        purple_stained_glass = Block("minecraft", "purple_stained_glass")
-        magenta_stained_glass = Block("minecraft", "magenta_stained_glass")
-    
-        # Nature blocks
-        oak_log = Block("minecraft", "oak_log")
-        birch_log = Block("minecraft", "birch_log")
-        cherry_log = Block("minecraft", "cherry_log")
-        oak_leaves = Block("minecraft", "oak_leaves")
-        cherry_leaves = Block("minecraft", "cherry_leaves")
-        azalea_leaves = Block("minecraft", "azalea_leaves")
-        flowering_azalea_leaves = Block("minecraft", "flowering_azalea_leaves")
-    
-        # Architectural elements
-        quartz_stairs = Block("minecraft", "quartz_stairs")
-        white_concrete_stairs = Block("minecraft", "white_concrete_stairs")
-        quartz_slab = Block("minecraft", "quartz_slab")
-        white_concrete_slab = Block("minecraft", "white_concrete_slab")
-    
-        # Special blocks
-        air = Block("minecraft", "air")
-        water = Block("minecraft", "water")
-        chain = Block("minecraft", "chain")
-        lantern = Block("minecraft", "lantern")
-        end_rod = Block("minecraft", "end_rod")
-    
-    
-        def place(x, y, z, block):
-            cx, cz = x >> 4, z >> 4
-            try:
-                chunk = world.get_chunk(cx, cz, dimension)
-            except:
-                chunk = world.create_chunk(cx, cz, dimension)
-            lx, lz = x % 16, z % 16
-            chunk.blocks[lx, y, lz] = chunk.block_palette.get_add_block(block)
-            world.put_chunk(chunk, dimension)
-    
-    
-        # Clear massive area for the floating city
-        for dx in range(-150, 150):
-            for dz in range(-150, 150):
-                for dy in range(0, 150):
-                    place(base_x + dx, ground_y + dy, base_z + dz, air)
-    
-        # FLOATING ISLANDS - Multiple levels and sizes
-        island_data = [
-            # (center_x, center_z, center_y, radius, height, island_type)
-            (0, 0, 40, 35, 15, "main"),  # Main central island
-            (-60, -40, 60, 25, 12, "tower"),  # Northwest tower island
-            (60, -40, 50, 20, 10, "garden"),  # Northeast garden island
-            (-60, 60, 45, 22, 11, "crystal"),  # Southwest crystal island
-            (80, 70, 65, 18, 9, "temple"),  # Southeast temple island
-            (0, -80, 35, 15, 8, "bridge"),  # North connector island
-            (0, 90, 55, 16, 8, "sanctuary"),  # South sanctuary island
-            (-90, 0, 70, 12, 7, "outpost"),  # West outpost
-            (100, 0, 30, 14, 8, "spire"),  # East spire island
-        ]
-    
-    
-        def create_floating_island(center_x, center_z, center_y, radius, height, island_type):
-    
-            # Island base terrain
-            for dx in range(-radius - 5, radius + 6):
-                for dz in range(-radius - 5, radius + 6):
-                    distance = math.sqrt(dx * dx + dz * dz)
-                    if distance <= radius:
-                        # Irregular height variation
-                        noise = math.sin(dx * 0.3) * math.cos(dz * 0.3) * 3
-                        island_height = int(height + noise * (1 - distance / radius))
-    
-                        for dy in range(island_height):
-                            y_pos = center_y - island_height // 2 + dy
-    
-                            # Island layers
-                            if dy < island_height * 0.3:
-                                # Bottom - dark stone
-                                block = dark_prismarine
-                            elif dy < island_height * 0.7:
-                                # Middle - regular stone
-                                block = prismarine_bricks
-                            else:
-                                # Top - light stone/grass
-                                if island_type == "crystal":
-                                    block = amethyst_block
-                                elif island_type == "garden":
-                                    block = quartz_block
-                                else:
-                                    block = white_concrete
-    
-                            place(base_x + center_x + dx, ground_y + y_pos, base_z + center_z + dz, block)
-    
-                        # Island surface
-                        surface_y = center_y + island_height // 2
-                        if distance < radius * 0.8:
-                            if island_type == "crystal":
-                                place(base_x + center_x + dx, ground_y + surface_y, base_z + center_z + dz,
-                                      light_blue_stained_glass)
-                            else:
-                                place(base_x + center_x + dx, ground_y + surface_y, base_z + center_z + dz, white_concrete)
-    
-    
-        # Create all floating islands
-        for island in island_data:
-            create_floating_island(*island)
-    
-        # MAIN CENTRAL PALACE - The crown jewel
-        palace_x, palace_z, palace_y = 0, 0, 55
-        palace_width, palace_depth = 30, 30
-        palace_height = 45
-    
-        # Palace foundation platform
-        for dx in range(-palace_width // 2 - 3, palace_width // 2 + 4):
-            for dz in range(-palace_depth // 2 - 3, palace_depth // 2 + 4):
-                place(base_x + palace_x + dx, ground_y + palace_y, base_z + palace_z + dz, chiseled_quartz)
-    
-        # Palace main structure
-        for dx in range(-palace_width // 2, palace_width // 2 + 1):
-            for dz in range(-palace_depth // 2, palace_depth // 2 + 1):
-                if abs(dx) == palace_width // 2 or abs(dz) == palace_depth // 2:
-                    # Palace walls with magical pattern
-                    for dy in range(1, palace_height):
-                        if dy % 6 == 0:
-                            wall_block = chiseled_quartz
-                        elif dy % 6 == 3:
-                            wall_block = amethyst_block
-                        else:
-                            wall_block = quartz_block
-    
-                        place(base_x + palace_x + dx, ground_y + palace_y + dy, base_z + palace_z + dz, wall_block)
+
+    def create_circular_wall(center_x, center_z, center_y, radius, height, thickness, wall_block):
+        for angle in range(360):
+            for t in range(thickness):
+                x = center_x + int((radius - t) * math.cos(math.radians(angle)))
+                z = center_z + int((radius - t) * math.sin(math.radians(angle)))
+                for y in range(center_y, center_y + height):
+                    place_block(x, y, z, wall_block)
+
+
+    def create_tower(center_x, center_z, base_y, radius, height, tower_block, roof_block):
+        # Base de la torre
+        for dx in range(-radius - 1, radius + 2):
+            for dz in range(-radius - 1, radius + 2):
+                distance = math.sqrt(dx * dx + dz * dz)
+                if distance <= radius + 1:
+                    x, z = center_x + dx, center_z + dz
+                    for y in range(base_y, base_y + height):
+                        if distance <= radius:
+                            if distance >= radius - 2:  # Paredes
+                                place_block(x, y, z, tower_block)
+                            elif y == base_y or (y - base_y) % 10 == 0:  # Pisos
+                                place_block(x, y, z, oak_planks)
+
+        # Techo cónico
+        roof_height = radius + 5
+        for dy in range(roof_height):
+            roof_radius = max(1, radius - dy // 2)
+            for angle in range(0, 360, 5):
+                x = center_x + int(roof_radius * math.cos(math.radians(angle)))
+                z = center_z + int(roof_radius * math.sin(math.radians(angle)))
+                place_block(x, base_y + height + dy, z, roof_block)
+
+        # Ventanas
+        for level in range(2, height, 8):
+            for angle in range(0, 360, 90):
+                window_x = center_x + int(radius * math.cos(math.radians(angle)))
+                window_z = center_z + int(radius * math.sin(math.radians(angle)))
+                place_block(window_x, base_y + level, window_z, glass)
+                place_block(window_x, base_y + level + 1, window_z, glass)
+
+
+    def create_rectangular_structure(x1, z1, x2, z2, base_y, height, wall_block, floor_block):
+        min_x, max_x = min(x1, x2), max(x1, x2)
+        min_z, max_z = min(z1, z2), max(z1, z2)
+
+        for x in range(min_x, max_x + 1):
+            for z in range(min_z, max_z + 1):
+                # Paredes
+                if x == min_x or x == max_x or z == min_z or z == max_z:
+                    for y in range(base_y, base_y + height):
+                        place_block(x, y, z, wall_block)
+                # Pisos
                 else:
-                    # Interior floors at multiple levels
-                    for floor_y in [8, 18, 28, 38]:
-                        place(base_x + palace_x + dx, ground_y + palace_y + floor_y, base_z + palace_z + dz, quartz_slab)
-    
-        # Palace towers (4 corner towers)
-        tower_positions = [(-12, -12), (12, -12), (-12, 12), (12, 12)]
-        for tower_dx, tower_dz in tower_positions:
-            tower_x = palace_x + tower_dx
-            tower_z = palace_z + tower_dz
-            tower_height = 55
-    
-            # Tower structure
-            for dx in range(-3, 4):
-                for dz in range(-3, 4):
-                    if abs(dx) == 3 or abs(dz) == 3:
-                        for dy in range(palace_height, palace_height + tower_height):
-                            if dy % 8 == 0:
-                                tower_block = chiseled_quartz
-                            elif dy % 8 == 4:
-                                tower_block = amethyst_block
-                            else:
-                                tower_block = white_concrete
-    
-                            place(base_x + tower_x + dx, ground_y + palace_y + dy, base_z + tower_z + dz, tower_block)
-    
-            # Magical crystal spire on each tower
-            spire_height = 15
-            for dy in range(spire_height):
-                spire_size = max(1, 3 - dy // 3)
-                spire_y = palace_y + palace_height + tower_height + dy
-    
-                for dx in range(-spire_size, spire_size + 1):
-                    for dz in range(-spire_size, spire_size + 1):
-                        if abs(dx) == spire_size or abs(dz) == spire_size or spire_size == 1:
-                            if dy % 3 == 0:
-                                spire_block = sea_lantern
-                            else:
-                                spire_block = amethyst_block
-    
-                            place(base_x + tower_x + dx, ground_y + spire_y, base_z + tower_z + dz, spire_block)
-    
-        # CRYSTAL BRIDGES connecting islands
-        bridge_connections = [
-            # (start_island_idx, end_island_idx, bridge_type)
-            (0, 1, "crystal"),  # Main to northwest
-            (0, 2, "glass"),  # Main to northeast
-            (0, 3, "crystal"),  # Main to southwest
-            (0, 4, "light"),  # Main to southeast
-            (0, 5, "glass"),  # Main to north
-            (0, 6, "crystal"),  # Main to south
-            (1, 7, "light"),  # Northwest to west
-            (2, 8, "glass"),  # Northeast to east
-        ]
-    
-    
-        def build_magical_bridge(start_pos, end_pos, bridge_type):
-            start_x, start_z, start_y = start_pos
-            end_x, end_z, end_y = end_pos
-    
-            distance = math.sqrt((end_x - start_x) ** 2 + (end_z - start_z) ** 2)
-            steps = int(distance * 1.5)  # More detail
-    
-            for i in range(steps + 1):
-                progress = i / max(steps, 1)
-    
-                # Bridge path with curve
-                bridge_x = int(start_x + (end_x - start_x) * progress)
-                bridge_z = int(start_z + (end_z - start_z) * progress)
-    
-                # Magical arc - bridges curve upward in the middle
-                height_offset = int(15 * math.sin(progress * math.pi))
-                bridge_y = int(start_y + (end_y - start_y) * progress + height_offset)
-    
-                # Bridge width
-                for width_offset in range(-2, 3):
-                    bridge_x_offset = bridge_x + width_offset
-    
-                    # Bridge materials based on type
-                    if bridge_type == "crystal":
-                        if width_offset == 0:
-                            bridge_block = sea_lantern
-                        else:
-                            bridge_block = cyan_stained_glass
-                    elif bridge_type == "glass":
-                        if width_offset == 0:
-                            bridge_block = glowstone
-                        else:
-                            bridge_block = white_stained_glass
-                    else:  # light bridge
-                        if width_offset == 0:
-                            bridge_block = end_rod
-                        else:
-                            bridge_block = light_blue_stained_glass
-    
-                    place(base_x + bridge_x_offset, ground_y + bridge_y, base_z + bridge_z, bridge_block)
-    
-                    # Bridge supports every few blocks
-                    if i % 8 == 0 and abs(width_offset) == 2:
-                        for support_dy in range(-5, 0):
-                            place(base_x + bridge_x_offset, ground_y + bridge_y + support_dy, base_z + bridge_z, chain)
-    
-    
-        # Build all bridges
-        for start_idx, end_idx, bridge_type in bridge_connections:
-            start_island = island_data[start_idx]
-            end_island = island_data[end_idx]
-    
-            start_pos = (start_island[0], start_island[1], start_island[2] + start_island[4] // 2)
-            end_pos = (end_island[0], end_island[1], end_island[2] + end_island[4] // 2)
-    
-            build_magical_bridge(start_pos, end_pos, bridge_type)
-    
-        # MAGICAL WATERFALLS falling into the void
-        waterfall_positions = [
-            # (x, z, start_y, fall_distance)
-            (-35, -35, 65, 40),  # Northwest island
-            (35, -35, 60, 35),  # Northeast island
-            (-35, 35, 55, 30),  # Southwest island
-            (45, 45, 70, 45),  # Southeast island
-            (0, -45, 50, 25),  # North island
-            (0, 50, 65, 35),  # South island
-        ]
-    
-        for fall_x, fall_z, start_y, fall_distance in waterfall_positions:
-            # Create waterfall source
-            for dx in range(-2, 3):
-                for dz in range(-2, 3):
-                    if abs(dx) <= 1 and abs(dz) <= 1:
-                        place(base_x + fall_x + dx, ground_y + start_y, base_z + fall_z + dz, water)
-    
-            # Waterfall stream
-            for dy in range(fall_distance):
-                fall_y = start_y - dy
-    
-                # Water stream with varying width
-                stream_width = max(1, 3 - dy // 10)
-                for dx in range(-stream_width, stream_width + 1):
-                    for dz in range(-stream_width, stream_width + 1):
-                        if abs(dx) <= stream_width and abs(dz) <= stream_width:
-                            place(base_x + fall_x + dx, ground_y + fall_y, base_z + fall_z + dz, water)
-    
-        # FLOATING GARDENS with magical trees
-        garden_islands = [2, 3, 6]  # Garden, crystal, and sanctuary islands
-    
-    
-        def create_magical_tree(x, z, base_y, tree_type):
-            tree_height = 15 + random.randint(-3, 5)
-    
-            # Magical trunk
-            trunk_blocks = {{
-                "cherry": cherry_log,
-                "crystal": amethyst_block,
-                "light": glowstone
-            }}
-    
-            trunk_block = trunk_blocks.get(tree_type, oak_log)
-    
-            for dy in range(tree_height):
-                place(base_x + x, ground_y + base_y + dy, base_z + z, trunk_block)
-    
-            # Magical canopy
-            canopy_radius = 6
-            canopy_blocks = {{
-                "cherry": cherry_leaves,
-                "crystal": cyan_stained_glass,
-                "light": white_stained_glass
-            }}
-    
-            canopy_block = canopy_blocks.get(tree_type, flowering_azalea_leaves)
-    
-            for dx in range(-canopy_radius, canopy_radius + 1):
-                for dz in range(-canopy_radius, canopy_radius + 1):
-                    for dy in range(5):
-                        distance = math.sqrt(dx * dx + dz * dz)
-                        if distance <= canopy_radius:
-                            canopy_y = base_y + tree_height - 3 + dy
-                            place(base_x + x + dx, ground_y + canopy_y, base_z + z + dz, canopy_block)
-    
-            # Magical effects around tree
-            for angle in range(0, 360, 60):
-                effect_x = x + int(8 * math.cos(math.radians(angle)))
-                effect_z = z + int(8 * math.sin(math.radians(angle)))
-                effect_y = base_y + tree_height + 2
-    
-                place(base_x + effect_x, ground_y + effect_y, base_z + effect_z, end_rod)
-    
-    
-        # Plant magical trees on garden islands
-        for island_idx in garden_islands:
-            island = island_data[island_idx]
-            island_x, island_z, island_y, radius = island[0], island[1], island[2], island[3]
-    
-            tree_types = ["cherry", "crystal", "light"]
-            tree_type = tree_types[island_idx % 3]
-    
-            # Multiple trees per island
-            tree_count = 8 + island_idx * 2
-            for i in range(tree_count):
-                angle = (360 / tree_count) * i
-                tree_distance = radius * 0.6
-                tree_x = island_x + int(tree_distance * math.cos(math.radians(angle)))
-                tree_z = island_z + int(tree_distance * math.sin(math.radians(angle)))
-    
-                create_magical_tree(tree_x, tree_z, island_y + island[4] // 2 + 1, tree_type)
-    
-        # FLOATING RUINS AND MYSTERIOUS STRUCTURES
-        ruin_positions = [
-            # Scattered ruins floating independently
-            (-120, -80, 80, "temple"),
-            (130, -70, 40, "obelisk"),
-            (-100, 110, 90, "arch"),
-            (120, 95, 25, "platform"),
-            (0, -120, 100, "spire"),
-            (-80, -120, 60, "rings"),
-        ]
-    
-    
-        def build_floating_ruin(x, z, y, ruin_type):
-            if ruin_type == "temple":
-                # Ancient temple structure
-                for dx in range(-8, 9):
-                    for dz in range(-8, 9):
-                        if abs(dx) == 8 or abs(dz) == 8:
-                            for dy in range(15):
-                                if dy % 4 == 0:
-                                    ruin_block = chiseled_quartz
-                                else:
-                                    ruin_block = quartz_pillar
-                                place(base_x + x + dx, ground_y + y + dy, base_z + z + dz, ruin_block)
-    
-                # Temple top with crystal
-                place(base_x + x, ground_y + y + 15, base_z + z, sea_lantern)
-    
-            elif ruin_type == "obelisk":
-                # Tall crystal obelisk
-                obelisk_height = 25
-                for dy in range(obelisk_height):
-                    size = max(1, 4 - dy // 5)
-                    for dx in range(-size, size + 1):
-                        for dz in range(-size, size + 1):
-                            if abs(dx) == size or abs(dz) == size or size == 1:
-                                if dy % 5 == 0:
-                                    obelisk_block = amethyst_block
-                                else:
-                                    obelisk_block = purple_stained_glass
-                                place(base_x + x + dx, ground_y + y + dy, base_z + z + dz, obelisk_block)
-    
-            elif ruin_type == "arch":
-                # Magical floating archway
-                arch_width = 12
-                arch_height = 15
-    
-                for dx in range(-arch_width // 2, arch_width // 2 + 1):
-                    for dy in range(arch_height):
-                        # Create arch shape
-                        distance_from_center = abs(dx)
-                        max_height_at_distance = arch_height - (distance_from_center * distance_from_center // 3)
-    
-                        if dy <= max_height_at_distance:
-                            if dx == -arch_width // 2 or dx == arch_width // 2 or dy == max_height_at_distance:
-                                place(base_x + x + dx, ground_y + y + dy, base_z + z, quartz_pillar)
-                                place(base_x + x + dx, ground_y + y + dy, base_z + z + 1, quartz_pillar)
-    
-            elif ruin_type == "rings":
-                # Floating ring structures
-                ring_radius = 6
-                for ring_level in range(3):
-                    ring_y = y + ring_level * 8
-                    for angle in range(0, 360, 15):
-                        ring_x = x + int(ring_radius * math.cos(math.radians(angle)))
-                        ring_z = z + int(ring_radius * math.sin(math.radians(angle)))
-    
-                        place(base_x + ring_x, ground_y + ring_y, base_z + ring_z, magenta_stained_glass)
-    
-    
-        # Build all floating ruins
-        for ruin_x, ruin_z, ruin_y, ruin_type in ruin_positions:
-            build_floating_ruin(ruin_x, ruin_z, ruin_y, ruin_type)
-    
-        # MAGICAL LIGHTING SYSTEM
-        light_positions = []
-    
-        # Palace lighting
-        for dx in range(-palace_width // 2, palace_width // 2 + 1, 5):
-            for dz in range(-palace_depth // 2, palace_depth // 2 + 1, 5):
-                if abs(dx) == palace_width // 2 or abs(dz) == palace_depth // 2:
-                    light_positions.append((palace_x + dx, palace_z + dz, palace_y + palace_height + 2))
-    
-        # Tower tops
-        for tower_dx, tower_dz in tower_positions:
-            light_positions.append((palace_x + tower_dx, palace_z + tower_dz, palace_y + palace_height + 55 + 15))
-    
-        # Island perimeter lighting
-        for island in island_data:
-            island_x, island_z, island_y, radius = island[0], island[1], island[2], island[3]
-    
-            for angle in range(0, 360, 30):
-                light_x = island_x + int((radius + 2) * math.cos(math.radians(angle)))
-                light_z = island_z + int((radius + 2) * math.sin(math.radians(angle)))
-                light_y = island_y + island[4] // 2 + 3
-    
-                light_positions.append((light_x, light_z, light_y))
-    
-        # Floating light orbs in empty space
-        for i in range(50):
-            orb_x = random.randint(-140, 140)
-            orb_z = random.randint(-140, 140)
-            orb_y = random.randint(20, 120)
-    
-            light_positions.append((orb_x, orb_z, orb_y))
-    
-        # Place all magical lighting
-        for light_x, light_z, light_y in light_positions:
-            # Alternate between different magical light sources
-            light_types = [sea_lantern, glowstone, end_rod, lantern]
-            light_block = light_types[hash((light_x, light_z, light_y)) % len(light_types)]
-    
-            place(base_x + light_x, ground_y + light_y, base_z + light_z, light_block)
-    
-        # ATMOSPHERIC DETAILS - Floating particles and mystical elements
-        particle_positions = []
-    
-        # Magical floating crystals
-        for i in range(100):
-            crystal_x = random.randint(-130, 130)
-            crystal_z = random.randint(-130, 130)
-            crystal_y = random.randint(30, 110)
-    
-            # Small floating crystal clusters
-            place(base_x + crystal_x, ground_y + crystal_y, base_z + crystal_z, amethyst_block)
-    
-            # Crystal supports
-            for support_dy in range(1, 4):
-                if random.random() < 0.7:
-                    place(base_x + crystal_x, ground_y + crystal_y - support_dy, base_z + crystal_z, purple_stained_glass)
-    
-        # Floating lily pads in mid-air (magical effect)
-        for i in range(30):
-            lily_x = random.randint(-100, 100)
-            lily_z = random.randint(-100, 100)
-            lily_y = random.randint(40, 90)
-    
-            # Magical floating platforms
-            for dx in range(-2, 3):
-                for dz in range(-2, 3):
-                    if abs(dx) + abs(dz) <= 2:
-                        place(base_x + lily_x + dx, ground_y + lily_y, base_z + lily_z + dz, cyan_stained_glass)
-    
-        # Save and close
-        world.save()
-        world.close()
-        """
+                    for floor_level in range(base_y, base_y + height, 5):
+                        place_block(x, floor_level, z, floor_block)
+
+
+    # ESTRUCTURA PRINCIPAL DEL CASTILLO
+
+    # 1. BASE Y TERRENO
+    castle_radius = 80
+    for dx in range(-castle_radius, castle_radius + 1):
+        for dz in range(-castle_radius, castle_radius + 1):
+            distance = math.sqrt(dx * dx + dz * dz)
+            if distance <= castle_radius:
+                place_block(base_x + dx, ground_y - 1, base_z + dz, grass_block)
+                place_block(base_x + dx, ground_y - 2, base_z + dz, dirt)
+
+    # 2. MURALLA EXTERIOR PRINCIPAL (Circular)
+    main_wall_radius = 70
+    main_wall_height = 25
+    create_circular_wall(base_x, base_z, ground_y, main_wall_radius, main_wall_height, 3, stone_bricks)
+
+    # Almenas en la muralla exterior
+    for angle in range(0, 360, 8):
+        x = base_x + int(main_wall_radius * math.cos(math.radians(angle)))
+        z = base_z + int(main_wall_radius * math.sin(math.radians(angle)))
+        if angle % 16 == 0:  # Almenas más altas
+            place_block(x, ground_y + main_wall_height, z, stone_bricks)
+            place_block(x, ground_y + main_wall_height + 1, z, stone_bricks)
+
+    # 3. TORRES DE LAS MURALLAS (8 torres alrededor)
+    tower_angles = [0, 45, 90, 135, 180, 225, 270, 315]
+    wall_towers = []
+
+    for angle in tower_angles:
+        tower_x = base_x + int((main_wall_radius + 5) * math.cos(math.radians(angle)))
+        tower_z = base_z + int((main_wall_radius + 5) * math.sin(math.radians(angle)))
+        wall_towers.append((tower_x, tower_z))
+        create_tower(tower_x, tower_z, ground_y, 8, 35, stone_bricks, red_concrete)
+
+    # 4. MURALLA INTERIOR
+    inner_wall_radius = 45
+    inner_wall_height = 20
+    create_circular_wall(base_x, base_z, ground_y, inner_wall_radius, inner_wall_height, 2, chiseled_stone_bricks)
+
+    # 5. TORRES INTERMEDIAS (4 torres entre murallas)
+    intermediate_tower_angles = [30, 120, 210, 300]
+    intermediate_towers = []
+
+    for angle in intermediate_tower_angles:
+        tower_x = base_x + int(57 * math.cos(math.radians(angle)))
+        tower_z = base_z + int(57 * math.sin(math.radians(angle)))
+        intermediate_towers.append((tower_x, tower_z))
+        create_tower(tower_x, tower_z, ground_y, 6, 30, mossy_stone_bricks, dark_oak_planks)
+
+    # 6. TORRE CENTRAL PRINCIPAL (LA MÁS IMPRESIONANTE)
+    central_tower_radius = 15
+    central_tower_height = 60
+
+    # Base de la torre central con decoración
+    for dx in range(-central_tower_radius - 3, central_tower_radius + 4):
+        for dz in range(-central_tower_radius - 3, central_tower_radius + 4):
+            distance = math.sqrt(dx * dx + dz * dz)
+            if distance <= central_tower_radius + 3:
+                x, z = base_x + dx, base_z + dz
+                # Fundación elevada
+                for y in range(ground_y, ground_y + 5):
+                    if distance <= central_tower_radius + 2:
+                        place_block(x, y, z, polished_andesite)
+
+    # Torre central principal
+    create_tower(base_x, base_z, ground_y + 5, central_tower_radius, central_tower_height, chiseled_stone_bricks,
+                 quartz_block)
+
+    # Añadir detalles decorativos a la torre central
+    for level in range(10, central_tower_height, 15):
+        for angle in range(0, 360, 30):
+            detail_x = base_x + int((central_tower_radius + 2) * math.cos(math.radians(angle)))
+            detail_z = base_z + int((central_tower_radius + 2) * math.sin(math.radians(angle)))
+            place_block(detail_x, ground_y + 5 + level, detail_z, chiseled_quartz_block)
+            place_block(detail_x, ground_y + 5 + level + 1, detail_z, chiseled_quartz_block)
+
+    # 7. SUB-TORRES EN LA TORRE CENTRAL
+    sub_tower_angles = [0, 120, 240]
+    for angle in sub_tower_angles:
+        sub_tower_x = base_x + int(25 * math.cos(math.radians(angle)))
+        sub_tower_z = base_z + int(25 * math.sin(math.radians(angle)))
+        create_tower(sub_tower_x, sub_tower_z, ground_y, 10, 45, white_concrete, cyan_concrete)
+
+    # 8. ESTRUCTURAS INTERIORES
+
+    # Salón principal (rectangular)
+    hall_width = 20
+    hall_length = 30
+    hall_height = 15
+    create_rectangular_structure(
+        base_x - hall_width // 2, base_z - hall_length // 2 - 35,
+        base_x + hall_width // 2, base_z + hall_length // 2 - 35,
+        ground_y, hall_height, stone_bricks, oak_planks
+    )
+
+    # Barracones
+    barracks_width = 12
+    barracks_length = 25
+    create_rectangular_structure(
+        base_x - 35, base_z - barracks_length // 2,
+        base_x - 35 + barracks_width, base_z + barracks_length // 2,
+        ground_y, 12, cobblestone, dark_oak_planks
+    )
+
+    create_rectangular_structure(
+        base_x + 35 - barracks_width, base_z - barracks_length // 2,
+        base_x + 35, base_z + barracks_length // 2,
+        ground_y, 12, cobblestone, dark_oak_planks
+    )
+
+    # 9. PUENTE Y ENTRADA PRINCIPAL
+    gate_angle = 180  # Entrada al sur
+    gate_x = base_x + int(main_wall_radius * math.cos(math.radians(gate_angle)))
+    gate_z = base_z + int(main_wall_radius * math.sin(math.radians(gate_angle)))
+
+    # Abrir la puerta en la muralla
+    for dx in range(-4, 5):
+        for dy in range(8):
+            place_block(gate_x + dx, ground_y + dy, gate_z, air)
+
+    # Puente de entrada
+    for bridge_dx in range(-3, 4):
+        for bridge_dz in range(15):
+            place_block(gate_x + bridge_dx, ground_y - 1, gate_z + bridge_dz, stone_bricks)
+            # Barandillas del puente
+            if abs(bridge_dx) == 3:
+                place_block(gate_x + bridge_dx, ground_y, gate_z + bridge_dz, iron_bars)
+                place_block(gate_x + bridge_dx, ground_y + 1, gate_z + bridge_dz, iron_bars)
+
+    # Torres de entrada
+    create_tower(gate_x - 8, gate_z, ground_y, 6, 30, stone_bricks, red_concrete)
+    create_tower(gate_x + 8, gate_z, ground_y, 6, 30, stone_bricks, red_concrete)
+
+    # 10. FOSO CON AGUA
+    foso_inner_radius = main_wall_radius + 8
+    foso_outer_radius = main_wall_radius + 15
+
+    for dx in range(-foso_outer_radius, foso_outer_radius + 1):
+        for dz in range(-foso_outer_radius, foso_outer_radius + 1):
+            distance = math.sqrt(dx * dx + dz * dz)
+            if foso_inner_radius <= distance <= foso_outer_radius:
+                x, z = base_x + dx, base_z + dz
+                # Excavar el foso
+                for y in range(ground_y - 4, ground_y):
+                    place_block(x, y, z, air)
+                # Llenar con agua
+                place_block(x, ground_y - 4, z, water)
+                place_block(x, ground_y - 3, z, water)
+
+    # 11. ILUMINACIÓN DEL CASTILLO
+    light_positions = []
+
+    # Antorchas en las murallas
+    for angle in range(0, 360, 20):
+        # Muralla exterior
+        x = base_x + int(main_wall_radius * math.cos(math.radians(angle)))
+        z = base_z + int(main_wall_radius * math.sin(math.radians(angle)))
+        place_block(x, ground_y + main_wall_height - 2, z, torch)
+
+        # Muralla interior
+        x = base_x + int(inner_wall_radius * math.cos(math.radians(angle)))
+        z = base_z + int(inner_wall_radius * math.sin(math.radians(angle)))
+        place_block(x, ground_y + inner_wall_height - 2, z, torch)
+
+    # Linternas en las torres
+    for tower_x, tower_z in wall_towers:
+        place_block(tower_x, ground_y + 35 + 8, tower_z, lantern)
+
+    for tower_x, tower_z in intermediate_towers:
+        place_block(tower_x, ground_y + 30 + 6, tower_z, lantern)
+
+    # Iluminación en la torre central
+    place_block(base_x, ground_y + 5 + central_tower_height + central_tower_radius + 5, base_z, glowstone)
+
+    # 12. DETALLES FINALES Y DECORACIÓN
+
+    # Banderas en las torres (usando lana de colores)
+    red_wool = Block("minecraft", "red_wool")
+    blue_wool = Block("minecraft", "blue_wool")
+    white_wool = Block("minecraft", "white_wool")
+
+    for tower_x, tower_z in wall_towers:
+        for flag_dy in range(3):
+            place_block(tower_x, ground_y + 35 + 10 + flag_dy, tower_z, red_wool)
+            place_block(tower_x + 1, ground_y + 35 + 10 + flag_dy, tower_z, blue_wool)
+
+    # Jardines internos
+    for garden_spots in range(20):
+        garden_x = base_x + random.randint(-inner_wall_radius + 5, inner_wall_radius - 5)
+        garden_z = base_z + random.randint(-inner_wall_radius + 5, inner_wall_radius - 5)
+        distance_from_center = math.sqrt((garden_x - base_x) ** 2 + (garden_z - base_z) ** 2)
+        if distance_from_center > 20:  # No interferir con la torre central
+            place_block(garden_x, ground_y, garden_z, grass_block)
+            if random.random() < 0.3:
+                place_block(garden_x, ground_y + 1, garden_z, Block("minecraft", "oak_sapling"))
+
+    # GUARDAR COORDENADAS
+    min_x = base_x - main_wall_radius - 15
+    max_x = base_x + main_wall_radius + 15
+    min_z = base_z - main_wall_radius - 15
+    max_z = base_z + main_wall_radius + 15
+    min_y = ground_y - 4
+    max_y = ground_y + central_tower_height + central_tower_radius + 10
+
+    # Datos de coordenadas
+    datos = {
+        "x1": min_x,
+        "y1": min_y,
+        "z1": min_z,
+        "x2": max_x,
+        "y2": max_y,
+        "z2": max_z
+    }
+
+    # Ruta al archivo JSON en la misma carpeta del script
+    ruta = os.path.join("{nombre_random}", "datos.json")
+
+    # Guardar los datos en el JSON
+    with open(ruta, "w", encoding="utf-8") as json_file:
+        json.dump(datos, json_file, indent=4, ensure_ascii=False)
+
+    # Guardar y cerrar el mundo
+    world.save()
+    world.close()        
+
+    """
 
     prompt = peticion + reglas
 
@@ -582,6 +389,5 @@ def ask_claude(peticion, ruta_del_mundo, nombre_random):
     for chunk in response:
         if hasattr(chunk, 'delta') and hasattr(chunk.delta, 'text') and chunk.delta.text:
             full_text += chunk.delta.text
-            print(chunk.delta.text)
 
     return full_text
